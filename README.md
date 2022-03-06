@@ -9,4 +9,4 @@
 - Practical works logbook of solution
 - CTFs logbook of solution
 
-**FINAL GRADE:** - ?
+**FINAL GRADE:** - 18
