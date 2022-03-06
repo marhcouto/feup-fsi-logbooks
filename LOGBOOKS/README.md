@@ -1,4 +1,4 @@
-## **Breve descrição do grupo**
+## **Logbooks**
 
 * Turno: [L]09
 * Grupo: 01
@@ -13,3 +13,7 @@
 * [Class #8 and #9 Work Developed](LOGBOOK8_9.md)
 * [Class #10 Work Developed](LOGBOOK10.md)
 * [Class #11 Work Developed](LOGBOOK11.md)
+
+**GRADE LABS:** 94%
+
+**GRADE CTFs:** 100%
