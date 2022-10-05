@@ -2,6 +2,8 @@
 
 ## **SEEDs Lab**
 
+https://seedsecuritylabs.org/Labs_20.04/Web/Web_XSS_Elgg/
+
 ### **Task 1**
 
 *  **Posting a Malicious Message to Display an Alert Window**

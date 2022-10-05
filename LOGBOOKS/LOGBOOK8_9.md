@@ -2,6 +2,8 @@
 
 ## **SEEDs Lab**
 
+https://seedsecuritylabs.org/Labs_20.04/Web/Web_SQL_Injection/
+
 ### **Task 1**
 
 * Get Familiar with SQL Statements

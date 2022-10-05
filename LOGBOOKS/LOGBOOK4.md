@@ -2,6 +2,8 @@
 
 ## **SEEDs Lab**
 
+https://seedsecuritylabs.org/Labs_20.04/Software/Environment_Variable_and_SetUID/
+
 ### **Task 1**
 
 - Used printenv/env to print out the environment variables

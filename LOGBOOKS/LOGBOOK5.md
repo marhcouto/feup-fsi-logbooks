@@ -2,6 +2,8 @@
 
 ## **SEEDs Lab**
 
+https://seedsecuritylabs.org/Labs_20.04/Software/Buffer_Overflow_Setuid/
+
 ### **Task 1**
 
 - Shut off the address randomization (no stack and heap addresses randomization), so that the addresses of the variables can be the same in each execution of a program
